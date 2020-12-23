@@ -13,6 +13,20 @@ export default {
   },
 };
 </script>
+<style>
+@media screen and (min-width: 375px) and (max-width: 425px)
+{
+  body {
+    zoom: 1.25;
+  }
+}
+@media screen and (min-width: 425px)
+{
+  body {
+    zoom: 1.5;
+  }
+}
+</style>
 <style scoped>
 .wrapper {
   justify-content: center;

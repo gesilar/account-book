@@ -63,6 +63,32 @@ const store = new Vuex.Store({
       } catch (e) {
         console.log(e);
       }
+    },
+    async backup(context) {
+      try {
+        const { 
+          accounts,
+          records,
+          types
+        } = context.state;
+        dataStore.writeFile({
+          accounts,
+          records,
+          types
+        });
+      } catch(e) {
+        console.log(e);
+      }
+    },
+    async restore() {
+      try {
+        const data = await dataStore.restore();
+        this.commit("updateAccts", data.accounts);
+        this.commit("updateTypes", data.types);
+        this.commit("updateRecords", data.records);
+      } catch(e) {
+        console.log(e);
+      }
     }
   },
 })

@@ -6,17 +6,19 @@
       </template>
       <van-icon name="add-o" size="18" @click="onAddAcctClick" />
     </nav-bar>
-    <van-list finished-text="没有更多了" onLoad="">
-      <van-swipe-cell>
-        <van-cell :border="false" title="总账户" value="内容" @click="onAccountDetailClick(0)"/>
-      </van-swipe-cell>
-      <van-swipe-cell v-for="acct in accounts" :key="acct.id" >
-        <van-cell :border="false" :title="acct.name" value="内容" @click="onAccountDetailClick(acct.id)"/>
-        <template #right>
-          <van-button square type="danger" text="删除" @click="onItemDelete(acct.id)"/>
-        </template>
-      </van-swipe-cell>
-    </van-list>
+    <van-pull-refresh v-model="refreshing" @refresh="onListRefresh">
+      <van-list finished-text="没有更多了">
+        <van-swipe-cell>
+          <van-cell :border="false" title="总账户" :value="sum(0)" @click="onAccountDetailClick(0)"/>
+        </van-swipe-cell>
+        <van-swipe-cell v-for="acct in accounts" :key="acct.id" >
+          <van-cell :border="false" :title="acct.name" :value="sum(acct.includeTypes)" @click="onAccountDetailClick(acct.id)"/>
+          <template #right>
+            <van-button square type="danger" text="删除" @click="onItemDelete(acct.id)"/>
+          </template>
+        </van-swipe-cell>
+      </van-list>
+    </van-pull-refresh>
     <footer class="footer">
       <van-button round type="info" @click="addRecord" icon="edit">记一笔</van-button>
     </footer>
@@ -31,14 +33,28 @@ export default {
     NavBar,
   },
   data() {
-    return {};
+    return {
+      refreshing: false
+    };
   },
   computed: mapState({
     accounts: (state) => state.accounts,
+    records: (state) => state.records
   }),
   methods: {
-    onListLoad() {
+    sum(includeTypes) {
+      let records;
+      if (includeTypes === 0) {
+        records = this.records
+      } else {
+        records = this.records.filter(i => includeTypes.indexOf(i.type) > -1);
+      }
+
+      return records.reduce((a, b) => { return a += b.inOrOut === "out" ? 0 - parseInt(b.amount) :  parseInt(b.amount)}, 0);
+    },
+    onListRefresh() {
       this.$store.dispatch("getData");
+      this.refreshing = false;
     },
     onSettingClick() {
       router.push(`/settings`);

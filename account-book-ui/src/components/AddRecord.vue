@@ -60,7 +60,7 @@ export default {
     },
     onClose() {
       const { amount, date, remark, selected,active} = this;
-      const payload = { amount, date, remark, type: selected, inOrOut: active === 0 ? "out" : "in"};
+      const payload = { amount, date, remark, type: selected[0], inOrOut: active === 0 ? "out" : "in"};
       if (this.validate(payload)) {
         this.$store.dispatch("addRecord", payload);
         router.back();

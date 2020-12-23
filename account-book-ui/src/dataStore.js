@@ -1,4 +1,4 @@
-var openIndexDB = async () => {
+const openIndexDB = async () => {
   return new Promise(function (resolve) {
     const request = indexedDB.open("acct_book_db");
     request.onerror = function () {
@@ -8,25 +8,25 @@ var openIndexDB = async () => {
       resolve(event.target.result);
     };
     request.onupgradeneeded = function (event) {
-      var db = event.target.result;
-      db.createObjectStore("accounts", {autoIncrement:true});
-      db.createObjectStore("records", {autoIncrement:true});
+      const db = event.target.result;
+      db.createObjectStore("accounts", { autoIncrement: true });
+      db.createObjectStore("records", { autoIncrement: true });
       db.createObjectStore("types", { keyPath: "text" });
     };
   })
 }
 
-var closeDb = (db) => {
+const closeDb = (db) => {
   if (db) {
     db.close();
   }
 }
 
-var getStoreData = (transaction) => (storeName) => {
+const getStoreData = (transaction) => (storeName) => {
   return new Promise(function (resolve) {
     let dataList = [];
     transaction.objectStore(storeName).openCursor().onsuccess = function (e) {
-      var cursor = e.target.result;
+      const cursor = e.target.result;
       if (cursor) {//eslint-disable-line
         const d = cursor.value;
         d.id = cursor.key;
@@ -39,9 +39,21 @@ var getStoreData = (transaction) => (storeName) => {
   });
 }
 
-var getAcctAndRecords = async () => {
+const addStoreDatas = (transaction) => (storeName, dataList) => {
+  return new Promise(function (resolve) {
+    const os = transaction.objectStore(storeName)
+    transaction.objectStore(storeName).clear().onsuccess = function () {
+      dataList.forEach((i) => {
+        os.add(i);
+      })
+      resolve(true);
+    }
+  });
+}
+
+const getAcctAndRecords = async () => {
   const db = await openIndexDB();
-  var transaction = db.transaction(["accounts", "records", "types"], "readwrite");
+  const transaction = db.transaction(["accounts", "records", "types"], "readwrite");
   transaction.oncomplete = function () {
     // doing something
   };
@@ -58,9 +70,9 @@ var getAcctAndRecords = async () => {
   }
 }
 
-var addAcct = async (acct) => {
+const addAcct = async (acct) => {
   const db = await openIndexDB();
-  var transaction = db.transaction(["accounts"], "readwrite");
+  const transaction = db.transaction(["accounts"], "readwrite");
   return new Promise(function (resolve) {
     transaction.objectStore("accounts").add(acct).onsuccess = function (event) {
       resolve(event.target.result);
@@ -69,9 +81,9 @@ var addAcct = async (acct) => {
   });
 }
 
-var deleteAcct = async (id) => {
+const deleteAcct = async (id) => {
   const db = await openIndexDB();
-  var transaction = db.transaction(["accounts"], "readwrite");
+  const transaction = db.transaction(["accounts"], "readwrite");
   return new Promise(function (resolve) {
     transaction.objectStore("accounts").delete(id).onsuccess = function () {
       resolve(true);
@@ -80,9 +92,9 @@ var deleteAcct = async (id) => {
   });
 }
 
-var addRecord = async (record) => {
+const addRecord = async (record) => {
   const db = await openIndexDB();
-  var transaction = db.transaction(["records"], "readwrite");
+  const transaction = db.transaction(["records"], "readwrite");
   return new Promise(function (resolve) {
     transaction.objectStore("records").add(record).onsuccess = function (event) {
       resolve(event.target.result);
@@ -90,9 +102,9 @@ var addRecord = async (record) => {
     }
   });
 }
-var deleteRecord = async (id) => {
+const deleteRecord = async (id) => {
   const db = await openIndexDB();
-  var transaction = db.transaction(["records"], "readwrite");
+  const transaction = db.transaction(["records"], "readwrite");
   return new Promise(function (resolve) {
     transaction.objectStore("records").delete(id).onsuccess = function () {
       resolve(true);
@@ -100,9 +112,9 @@ var deleteRecord = async (id) => {
     }
   });
 }
-var addType = async (type) => {
+const addType = async (type) => {
   const db = await openIndexDB();
-  var transaction = db.transaction(["types"], "readwrite");
+  const transaction = db.transaction(["types"], "readwrite");
   return new Promise(function () {
     transaction.objectStore("types").add(type).onsuccess = function () {
       closeDb(db);
@@ -110,6 +122,78 @@ var addType = async (type) => {
   });
 }
 
+const writeFile = async (data) => {
+  const type = window.PERSISTENT;//eslint-disable-line
+  if (!window.requestFileSystem) {
+    console.log("plugin not exists");
+    return;
+  }
+  return new Promise(function () {
+    window.requestFileSystem(type, 0, successCallback, errorCallback)
+    function successCallback(fs) {
+      fs.root.getFile(`account-data.txt`, { create: true, replace: true }, function (fileEntry) {
+        fileEntry.createWriter(function (fileWriter) {
+          fileWriter.onwriteend = function () {
+            alert("备份完成");
+          };
+
+          fileWriter.onerror = function (e) {
+            alert('备份出错: ' + e.toString());
+          };
+
+          fileWriter.write(JSON.stringify(data));
+        }, errorCallback);
+
+      }, errorCallback);
+    }
+
+    function errorCallback(error) {
+      alert("ERROR: " + error.code)
+    }
+  })
+}
+
+const restoreIntoIndexDB = async (data) => {
+  const {accounts, records, types} = data;
+  alert(`恢复账户：${accounts.length}条， 记录：${records.length}条， 类型：${types.length}条`);
+  const db = await openIndexDB();
+  const transaction = db.transaction(["accounts", "records", "types"], "readwrite");
+  const addData = addStoreDatas(transaction);
+  try {
+    await Promise.all([addData("accounts", accounts), addData("records", records), addData("types", types)]);
+  } catch(e) {
+    console.log(e);
+  }
+  closeDb(db);
+  return data;
+}
+
+const restore = async () => {
+  const type = window.PERSISTENT;//eslint-disable-line
+    const size = 5 * 1024 * 1024;
+  if (!window.requestFileSystem) {
+    console.log("plugin not exists");
+    return;
+  }
+  return new Promise(function (resolve) {
+    window.requestFileSystem(type, size, successCallback, errorCallback)
+    function successCallback(fs) {
+      fs.root.getFile('account-data.txt', {}, function (fileEntry) {
+        fileEntry.file(function (file) {
+          const reader = new FileReader();
+          reader.onloadend = async function () {
+            await restoreIntoIndexDB(JSON.parse(this.result));
+            resolve(JSON.parse(this.result));
+          };
+          reader.readAsText(file);
+        }, errorCallback);
+      }, errorCallback);
+    }
+    function errorCallback(error) {
+      alert("ERROR: " + error.code);
+    }
+  })
+}
 
 export default {
   getAcctAndRecords,
@@ -117,5 +201,7 @@ export default {
   deleteAcct,
   addRecord,
   deleteRecord,
-  addType
+  addType,
+  writeFile,
+  restore
 }

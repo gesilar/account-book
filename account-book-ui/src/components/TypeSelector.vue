@@ -2,7 +2,7 @@
   <section>
     <ul class="type-selector">
       <li v-for="tItem in types" :key="tItem.text" class="type-option">
-        <van-icon :name="tItem.icon" @click="onTypeSelectClick(tItem.text)" :color="selected.indexOf(tItem.text) > -1 ? `red` : undefined"></van-icon>
+        <van-icon size="20px" :name="tItem.icon" @click="onTypeSelectClick(tItem.text)" :color="selected.indexOf(tItem.text) > -1 ? `red` : undefined"></van-icon>
         <a class="type-text">{{ tItem.text }}</a>
       </li>
       <!-- <li class="type-option add">
@@ -58,13 +58,12 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 32px;
-  height: 32px;
-  padding: 8px;
+  width: 40px;
+  height: 40px;
+  padding: 10px;
 }
 .type-text {
   font-size: 8px;
   display: inline-block;
-  transform: scale(0.8);
 }
 </style>

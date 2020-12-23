@@ -1,5 +1,4 @@
 account = {
-	"id": 1,
 	"name": "旅游",
 	"includeTypes": ["旅游"]
 }

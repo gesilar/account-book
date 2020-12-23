@@ -17,8 +17,14 @@ export default {
       settings: [{
         funcName: "backup",
         title: "备份到本地",
-        handler: function() {
-          console.log("1");
+        handler: () => {
+          this.$store.dispatch("backup");
+        }
+      },{
+        funcName: "restore",
+        title: "恢复到本地",
+        handler: () => {
+          this.$store.dispatch("restore");
         }
       }]
     }
