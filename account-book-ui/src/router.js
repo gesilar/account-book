@@ -6,6 +6,7 @@ import AddAccount from "./components/AddAccount.vue";
 import AddRecord from "./components/AddRecord.vue";
 import AcctDetail from "./components/AcctDetail.vue";
 import Settings from "./components/Settings.vue";
+import About from "./components/About.vue";
 Vue.use(VueRouter);
 const router = new VueRouter({routes: [
   { path: "/", component: Home},
@@ -13,6 +14,7 @@ const router = new VueRouter({routes: [
   { path: "/add-record", component: AddRecord},
   { path: "/account-detail/:id", component: AcctDetail, props: true},
   { path: "/settings", component: Settings},
+  { path: "/about", component: About},
 ]})
 
 export default router;

@@ -1,19 +1,15 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import dataStore from "./dataStore";
-Vue.use(Vuex)
+import dataStore from "./model/dataStore";
+Vue.use(Vuex);
 const store = new Vuex.Store({
   state: {
     accounts: [],
     records: [],
-    types: []
   },
   mutations: {
     updateAccts(state, payload) {
       state.accounts = payload;
-    },
-    updateTypes(state, payload) {
-      state.types = payload;
     },
     updateRecords(state, payload) {
       state.records = payload;
@@ -23,7 +19,6 @@ const store = new Vuex.Store({
     async getData() {
       const data = await dataStore.getAcctAndRecords();
       this.commit("updateAccts", data.accounts);
-      this.commit("updateTypes", data.types);
       this.commit("updateRecords", data.records);
     },
     async addAcct(context, payload) {
@@ -69,12 +64,10 @@ const store = new Vuex.Store({
         const { 
           accounts,
           records,
-          types
         } = context.state;
         dataStore.writeFile({
           accounts,
           records,
-          types
         });
       } catch(e) {
         console.log(e);
@@ -84,7 +77,6 @@ const store = new Vuex.Store({
       try {
         const data = await dataStore.restore();
         this.commit("updateAccts", data.accounts);
-        this.commit("updateTypes", data.types);
         this.commit("updateRecords", data.records);
       } catch(e) {
         console.log(e);

@@ -11,7 +11,6 @@ const openIndexDB = async () => {
       const db = event.target.result;
       db.createObjectStore("accounts", { autoIncrement: true });
       db.createObjectStore("records", { autoIncrement: true });
-      db.createObjectStore("types", { keyPath: "text" });
     };
   })
 }
@@ -53,7 +52,7 @@ const addStoreDatas = (transaction) => (storeName, dataList) => {
 
 const getAcctAndRecords = async () => {
   const db = await openIndexDB();
-  const transaction = db.transaction(["accounts", "records", "types"], "readwrite");
+  const transaction = db.transaction(["accounts", "records"], "readwrite");
   transaction.oncomplete = function () {
     // doing something
   };
@@ -61,12 +60,11 @@ const getAcctAndRecords = async () => {
     // 不要忘记错误处理！
   };
   const getData = getStoreData(transaction);
-  const [accounts, records, types] = await Promise.all([getData("accounts"), getData("records"), getData("types")]);
+  const [accounts, records] = await Promise.all([getData("accounts"), getData("records")]);
   closeDb(db);
   return {
     accounts,
-    records,
-    types
+    records
   }
 }
 
@@ -112,15 +110,6 @@ const deleteRecord = async (id) => {
     }
   });
 }
-const addType = async (type) => {
-  const db = await openIndexDB();
-  const transaction = db.transaction(["types"], "readwrite");
-  return new Promise(function () {
-    transaction.objectStore("types").add(type).onsuccess = function () {
-      closeDb(db);
-    }
-  });
-}
 
 const writeFile = async (data) => {
   const type = window.PERSISTENT;//eslint-disable-line
@@ -140,10 +129,8 @@ const writeFile = async (data) => {
           fileWriter.onerror = function (e) {
             alert('备份出错: ' + e.toString());
           };
-
           fileWriter.write(JSON.stringify(data));
         }, errorCallback);
-
       }, errorCallback);
     }
 
@@ -154,13 +141,13 @@ const writeFile = async (data) => {
 }
 
 const restoreIntoIndexDB = async (data) => {
-  const {accounts, records, types} = data;
-  alert(`恢复账户：${accounts.length}条， 记录：${records.length}条， 类型：${types.length}条`);
+  const {accounts, records} = data;
+  alert(`恢复账户：${accounts.length}条， 记录：${records.length}条`);
   const db = await openIndexDB();
-  const transaction = db.transaction(["accounts", "records", "types"], "readwrite");
+  const transaction = db.transaction(["accounts", "records"], "readwrite");
   const addData = addStoreDatas(transaction);
   try {
-    await Promise.all([addData("accounts", accounts), addData("records", records), addData("types", types)]);
+    await Promise.all([addData("accounts", accounts), addData("records", records)]);
   } catch(e) {
     console.log(e);
   }
@@ -201,7 +188,6 @@ export default {
   deleteAcct,
   addRecord,
   deleteRecord,
-  addType,
   writeFile,
   restore
 }

@@ -8,6 +8,7 @@
 </template>
 <script>
 import NavBar from "./NavBar.vue";
+import router from "../router";
 export default {
   components: {
     NavBar
@@ -25,6 +26,12 @@ export default {
         title: "恢复到本地",
         handler: () => {
           this.$store.dispatch("restore");
+        }
+      },{
+        funcName: "about",
+        title: "关于",
+        handler: () => {
+          router.push("/about");
         }
       }]
     }

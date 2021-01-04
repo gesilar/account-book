@@ -11,7 +11,7 @@
         <van-swipe-cell>
           <van-cell :border="false" title="总账户" :value="sum(0)" @click="onAccountDetailClick(0)"/>
         </van-swipe-cell>
-        <van-swipe-cell v-for="acct in accounts" :key="acct.id" >
+        <van-swipe-cell v-for="acct in accounts" :key="acct.id">
           <van-cell :border="false" :title="acct.name" :value="sum(acct.includeTypes)" @click="onAccountDetailClick(acct.id)"/>
           <template #right>
             <van-button square type="danger" text="删除" @click="onItemDelete(acct.id)"/>
@@ -79,6 +79,9 @@ export default {
 .home-container {
   width: 100%;
   height: 100%;
+}
+.van-swipe-cell {
+  margin: 8px 0;
 }
 .footer {
   position: absolute;

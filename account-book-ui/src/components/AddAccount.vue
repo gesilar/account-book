@@ -7,7 +7,7 @@
       label="账户名"
       maxlength="5"
     />
-    <type-selector v-model="selected"></type-selector>
+    <type-selector v-model="selected" multi></type-selector>
     <van-button @click="onAddAcct" round  type="info" class="add-btn" >新增</van-button>
   </section>
 </template>
