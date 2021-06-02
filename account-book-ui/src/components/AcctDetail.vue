@@ -3,7 +3,12 @@
     <nav-bar :title="accountName" back> </nav-bar>
     <van-list>
       <van-swipe-cell v-for="r in records" :key="r.id">
-          <van-cell :title="r.type" :value="getAmountLabel(r)" size="large" :label="r.remark" :icon="typeTextIconMap[r.type]"/>
+          <van-cell 
+          :title="r.type"
+          :value="getAmountLabel(r)" 
+          size="large" 
+          :label="`${(r.remark || r.type) + ' : '}${getDate(r.date)}`"
+          :icon="typeTextIconMap[r.type]"/>
           <template #right>
             <van-button square text="删除" type="danger" class="delete-button" @click="onItemDelete(r.id)"/>
           </template>
@@ -58,6 +63,10 @@ export default {
         return ``+ record.amount;
       }
     },
+    getDate(date) {
+      const d = new Date(date);
+      return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+    }
   }
 };
 </script>

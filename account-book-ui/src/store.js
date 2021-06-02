@@ -12,7 +12,7 @@ const store = new Vuex.Store({
       state.accounts = payload;
     },
     updateRecords(state, payload) {
-      state.records = payload;
+      state.records = payload.sort((a, b) => {return +new Date(b.date) - (+new Date(a.date))});
     }
   },
   actions: {
