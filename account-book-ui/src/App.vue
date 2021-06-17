@@ -37,7 +37,7 @@ html {
 }
 body {
   height: 100%;
-  background: #e8e8e8;
+  background: white;
 }
 @media screen and (min-width: 375px) and (max-width: 425px) {
   body {

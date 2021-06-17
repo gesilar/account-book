@@ -1,3 +1,4 @@
+import { restoreData } from "../../data/restoreFile.js";
 const openIndexDB = async () => {
   return new Promise(function (resolve) {
     const request = indexedDB.open("acct_book_db");
@@ -11,6 +12,7 @@ const openIndexDB = async () => {
       const db = event.target.result;
       db.createObjectStore("accounts", { autoIncrement: true });
       db.createObjectStore("records", { autoIncrement: true });
+      db.createObjectStore("types", { autoIncrement: true });
     };
   })
 }
@@ -42,7 +44,7 @@ const addStoreDatas = (transaction) => (storeName, dataList) => {
   return new Promise(function (resolve) {
     const os = transaction.objectStore(storeName)
     transaction.objectStore(storeName).clear().onsuccess = function () {
-      dataList.forEach((i) => {
+      dataList && dataList.forEach((i) => {
         os.add(i);
       })
       resolve(true);
@@ -52,7 +54,7 @@ const addStoreDatas = (transaction) => (storeName, dataList) => {
 
 const getAcctAndRecords = async () => {
   const db = await openIndexDB();
-  const transaction = db.transaction(["accounts", "records"], "readwrite");
+  const transaction = db.transaction(["accounts", "records", "types"], "readwrite");
   transaction.oncomplete = function () {
     // doing something
   };
@@ -60,11 +62,12 @@ const getAcctAndRecords = async () => {
     // 不要忘记错误处理！
   };
   const getData = getStoreData(transaction);
-  const [accounts, records] = await Promise.all([getData("accounts"), getData("records")]);
+  const [accounts, records, types] = await Promise.all([getData("accounts"), getData("records"), getData("types")]);
   closeDb(db);
   return {
     accounts,
-    records
+    records,
+    types
   }
 }
 
@@ -111,6 +114,28 @@ const deleteRecord = async (id) => {
   });
 }
 
+
+const addTypes = async (type) => {
+  const db = await openIndexDB();
+  const transaction = db.transaction(["types"], "readwrite");
+  return new Promise(function (resolve) {
+    transaction.objectStore("types").add(type).onsuccess = function (event) {
+      resolve(event.target.result);
+      closeDb(db);
+    }
+  });
+}
+const deleteTypes = async (id) => {
+  const db = await openIndexDB();
+  const transaction = db.transaction(["types"], "readwrite");
+  return new Promise(function (resolve) {
+    transaction.objectStore("types").delete(id).onsuccess = function () {
+      resolve(true);
+      closeDb(db);
+    }
+  });
+}
+
 const writeFile = async (data) => {
   const type = window.PERSISTENT;//eslint-disable-line
   if (!window.requestFileSystem) {
@@ -141,46 +166,58 @@ const writeFile = async (data) => {
 }
 
 const restoreIntoIndexDB = async (data) => {
-  const {accounts, records} = data;
-  alert(`恢复账户：${accounts.length}条， 记录：${records.length}条`);
+  const { accounts = [], records = [], types = [] } = data;
+  alert(`恢复账户：${accounts.length}条， 记录：${records.length}条, 类型： ${types.length}`);
   const db = await openIndexDB();
-  const transaction = db.transaction(["accounts", "records"], "readwrite");
+  const transaction = db.transaction(["accounts", "records", "types"], "readwrite");
   const addData = addStoreDatas(transaction);
   try {
-    await Promise.all([addData("accounts", accounts), addData("records", records)]);
-  } catch(e) {
+    await Promise.all([addData("accounts", accounts), addData("records", records), addData("types", types)]);
+  } catch (e) {
     console.log(e);
   }
   closeDb(db);
   return data;
 }
 
-const restore = async () => {
+
+const restore = async function(){
   const type = window.PERSISTENT;//eslint-disable-line
-    const size = 5 * 1024 * 1024;
+  const size = 5 * 1024 * 1024;//eslint-disable-line
+  let fileData = "";
   if (!window.requestFileSystem) {
-    console.log("plugin not exists");
-    return;
-  }
-  return new Promise(function (resolve) {
-    window.requestFileSystem(type, size, successCallback, errorCallback)
-    function successCallback(fs) {
-      fs.root.getFile('account-data.txt', {}, function (fileEntry) {
-        fileEntry.file(function (file) {
-          const reader = new FileReader();
-          reader.onloadend = async function () {
-            await restoreIntoIndexDB(JSON.parse(this.result));
-            resolve(JSON.parse(this.result));
-          };
-          reader.readAsText(file);
+    fileData = JSON.stringify(restoreData());
+  } else {
+    fileData = await new Promise(function (resolve) {
+      window.requestFileSystem(type, size, successCallback, errorCallback)
+      function successCallback(fs) {
+        fs.root.getFile('account-data.txt', {}, function (fileEntry) {
+          fileEntry.file(function (file) {
+            const reader = new FileReader();
+            reader.onloadend = async function () {
+             resolve(this.result);
+            };
+            reader.readAsText(file);
+          }, errorCallback);
         }, errorCallback);
-      }, errorCallback);
+      }
+      function errorCallback(error) {
+        alert("ERROR: " + error.code);
+      }
+    });
+  }
+  try {
+    await restoreIntoIndexDB(JSON.parse(fileData));
+    return JSON.parse(fileData);
+  } catch (e) {
+    return {
+      accounts: [],
+      records: [],
+      types: []
     }
-    function errorCallback(error) {
-      alert("ERROR: " + error.code);
-    }
-  })
+  }
 }
+
 
 export default {
   getAcctAndRecords,
@@ -188,6 +225,8 @@ export default {
   deleteAcct,
   addRecord,
   deleteRecord,
+  addTypes,
+  deleteTypes,
   writeFile,
   restore
 }

@@ -1,4 +1,5 @@
 account = {
+	id: 1,
 	"name": "旅游",
 	"includeTypes": ["旅游"]
 }
@@ -12,7 +13,9 @@ record = {
 	type: "旅游",
 	inOrOut: "out"
 }
+
 type = {
+	id: 1,
 	text: "旅游",
 	icon: "add"
 }

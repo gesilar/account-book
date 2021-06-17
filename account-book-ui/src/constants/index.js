@@ -6,3 +6,11 @@ export const types = [
   { text: "保险", icon: "like" },
   { text: "存款", icon: "gift" },
 ];
+
+export const icons = [
+  "gift",
+  "cart",
+  "fire",
+  "gold-coin",
+  "like"
+];

@@ -18,7 +18,6 @@
 </template>
 <script>
 import NavBar from "./NavBar.vue";
-import {types} from "../constants/index";
 export default {
   props: {
     id: String
@@ -43,7 +42,7 @@ export default {
     },
     typeTextIconMap: function() {
       const m = {};
-      types.forEach(i => {
+      this.$store.state.types.forEach(i => {
         m[i.text] = i.icon;
       })
       return m;
