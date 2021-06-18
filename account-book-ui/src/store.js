@@ -83,6 +83,9 @@ const store = new Vuex.Store({
         console.log(e);
       }
     },
+    async createDBIfNotExist() {
+      dataStore.createIndexDB("")
+    },
     async backup(context) {
       try {
         const { 
@@ -90,7 +93,7 @@ const store = new Vuex.Store({
           records,
           types
         } = context.state;
-        dataStore.writeFile({
+        dataStore.backupIntoFile({
           accounts,
           records,
           types
@@ -101,7 +104,7 @@ const store = new Vuex.Store({
     },
     async restore() {
       try {
-        const data = await dataStore.restore();
+        const data = await dataStore.restoreFromFile();
         this.commit("updateAccts", data.accounts);
         this.commit("updateRecords", data.records);
         this.commit("updateTypes", data.types);

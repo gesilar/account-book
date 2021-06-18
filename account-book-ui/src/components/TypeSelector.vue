@@ -8,7 +8,7 @@
         <van-icon
           size="20px" 
           :name="tItem.icon" 
-          @click="onTypeSelectClick(tItem.text)" 
+          @click="onTypeSelectOrDeleteClick(tItem)" 
           :color="selected.indexOf(tItem.text) > -1 ? `red` : undefined"
           :badge="editMode && tItem.id !== undefined ? '-' : ''"
           ></van-icon>
@@ -23,6 +23,7 @@
 </template>
 <script>
 import router from "../router";
+import {types} from "../constants";
 export default {
   model: {
     prop: "selected",
@@ -34,7 +35,7 @@ export default {
   },
   computed: {
     types: function() {
-      return this.$store.state.types;
+      return [...types, ...this.$store.state.types];
     }
   },
   data() {
@@ -43,20 +44,20 @@ export default {
     }
   },
   methods: {
-    onTypeSelectClick(text) {
+    onTypeSelectOrDeleteClick(item) {
       if (this.editMode) {
-        this.$store.dispatch("deleteTypes", text)
+        this.$store.dispatch("deleteTypes", item.id)
         return;
       }
-      const index = this.selected.indexOf(text);
+      const index = this.selected.indexOf(item.text);
       if (!this.multi) {
-        this.$emit("getValue", [text]);
+        this.$emit("getValue", [item.text]);
         return;
       }
       if (index > -1) {
         this.selected.splice(index, 1);
       } else {
-        this.selected.push(text);
+        this.selected.push(item.text);
       }
       this.$emit("getValue", this.selected);
     },
