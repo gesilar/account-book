@@ -35,7 +35,7 @@ export const readFile = (fileName) => {
   if (!window.requestFileSystem) {
     return Promise.resolve(false);
   } else {
-    return new Promise(function (resolve) {
+    return new Promise(function (resolve, reject) {
       window.requestFileSystem(type, size, successCallback, errorCallback)
       function successCallback(fs) {
         fs.root.getFile(fileName, {}, function (fileEntry) {
@@ -49,7 +49,7 @@ export const readFile = (fileName) => {
         }, errorCallback);
       }
       function errorCallback(error) {
-        alert("ERROR: " + error.code);
+        reject(error);
       }
     });
   }

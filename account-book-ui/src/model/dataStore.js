@@ -79,7 +79,10 @@ const deleteTypes = (id) => {
 
 const backupIntoFile = async (data) => {
   try {
-    return fileAccessor.writeFile(`account-data.txt`, data);
+    const r = fileAccessor.writeFile(`account-data.txt`, data);
+    if (r) {
+      alert(`备份成功`);
+    }
   } catch(e) {
     alert(e.message);
   }
@@ -107,20 +110,16 @@ const restoreIntoIndexDB = async (data) => {
 
 const restoreFromFile = async function(){
   let fileData;
-  if (!window.requestFileSystem) {
-    fileData = JSON.stringify(restoreData());
-  } else {
-    fileData = fileAccessor.readFile(`account-data.txt`)
-  }
   try {
+    if (!window.requestFileSystem) {
+      fileData = JSON.stringify(restoreData());
+    } else {
+      fileData = await fileAccessor.readFile(`account-data.txt`)
+    }
     const result = await restoreIntoIndexDB(JSON.parse(fileData));
     return result;
   } catch (e) {
-    return {
-      accounts: [],
-      records: [],
-      types: []
-    }
+    alert(`restore error: ${e.message}`)
   }
 }
 
