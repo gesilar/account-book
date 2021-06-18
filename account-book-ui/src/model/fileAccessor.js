@@ -20,7 +20,7 @@ export const writeFile = (fileName, data) => {
             fileWriter.onerror = function (e) {
               errorCallback(e);
             };
-            fileWriter.write(JSON.stringify(data));
+            fileWriter.write(data);
           }, errorCallback);
         }, errorCallback);
       },

@@ -79,7 +79,7 @@ const deleteTypes = (id) => {
 
 const backupIntoFile = async (data) => {
   try {
-    const r = fileAccessor.writeFile(`account-data.txt`, data);
+    const r = fileAccessor.writeFile(`account-data.txt`, JSON.stringify(data));
     if (r) {
       alert(`备份成功`);
     }
@@ -112,7 +112,7 @@ const restoreFromFile = async function(){
   let fileData;
   try {
     if (!window.requestFileSystem) {
-      fileData = JSON.stringify(restoreData());
+      fileData = restoreData();
     } else {
       fileData = await fileAccessor.readFile(`account-data.txt`)
     }

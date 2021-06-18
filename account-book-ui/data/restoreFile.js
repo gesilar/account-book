@@ -1,5 +1,5 @@
 export const restoreData = () => {
-  return {
+  return JSON.stringify({
     "accounts": [
       {
         "name": "过年人情",
@@ -25,5 +25,5 @@ export const restoreData = () => {
         "icon": "gift"
       }
     ]
-  }
+  })
 }
