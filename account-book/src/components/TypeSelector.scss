@@ -1,0 +1,27 @@
+.type-edit-container {
+  display: flex;
+  justify-content: flex-end;
+}
+.type-edit-btn {
+  display: block;
+  height: 20px;
+  padding-top: 10px;
+  padding-right: 30px;
+}
+.type-selector {
+  display: flex;
+  padding: 16px;
+  flex-wrap: wrap;
+}
+.type-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 35px;
+  height: 35px;
+  padding: 10px;
+}
+.type-text {
+  font-size: 8px;
+  display: inline-block;
+}
